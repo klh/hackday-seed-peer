@@ -31,6 +31,7 @@ fs.on('ready', function () {
             key: f.readFileSync('/etc/letsencrypt/live/hasselhoff.mafintosh.com/privkey.pem'),
             cert: f.readFileSync('/etc/letsencrypt/live/hasselhoff.mafintosh.com/fullchain.pem')
         })
+        server.listen(30000)
         ws.createServer({server: server}, handle)
     } else {
         ws.createServer({port: 30000}, handle)
