@@ -11,8 +11,7 @@ var fs = hyperdrive('./data.drive')
 var playlistUrl = 'http://drevent-lh.akamaihd.net/i/event12_0@427365/master.m3u8';
 
 crawl(playlistUrl,
-    function loop (err) {
-        if (err) throw err;
+    function loop () {
         setTimeout(function() {
             crawl(playlistUrl, loop)
         }, 3000)
