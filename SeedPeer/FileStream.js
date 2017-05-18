@@ -25,7 +25,16 @@ fs.on('ready', function () {
   server.listen(10000)
   discovery(fs, {live: true})
 
-    var wss = ws.createServer({port: 30000}, handle)
+    if (process.argv.indexOf('--ssl') > -1) {
+        var f = require('fs')
+        var server = require('https').createServer({
+            key: f.readFileSync('/etc/letsencrypt/live/hasselhoff.mafintosh.com/privkey.pem'),
+            cert: f.readFileSync('/etc/letsencrypt/live/hasselhoff.mafintosh.com/fullchain.pem')
+        })
+        ws.createServer({server: server}, handle)
+    } else {
+        ws.createServer({port: 30000}, handle)
+    }
 
     function handle(stream) {
       var s = fs.replicate({live: true, encrypt: false})
