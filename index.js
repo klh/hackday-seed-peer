@@ -4,6 +4,7 @@ var http = require('http')
 var serve = require('hyperdrive-http')
 var discovery = require('hyperdiscovery')
 var minimist = require('minimist')
+var ws = require('websocket-stream')
 
 var argv = minimist(process.argv)
 var archive = null
@@ -15,6 +16,14 @@ if (key) {
 } else {
   archive = hyperdrive(folder)
   mirror('./data', {name: '/', fs: archive}, {watch: true})
+}
+
+var wss = ws.createServer({port: 20000}, handle)
+
+function handle(stream) {
+  var s = archive.replicate({live: true, encrypt: false})
+  s.pipe(stream).pipe(s)
+  s.on('error', console.error)
 }
 
 archive.on('ready', function () {

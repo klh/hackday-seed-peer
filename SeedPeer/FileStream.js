@@ -6,6 +6,8 @@ var hyperdrive = require('hyperdrive')
 var discovery = require('hyperdiscovery')
 var serve = require('hyperdrive-http')
 var http = require('http')
+var ws = require('websocket-stream')
+var pump = require('pump')
 
 var fs = hyperdrive('./data.drive')
 var playlistUrl = 'http://drevent-lh.akamaihd.net/i/event12_0@427365/master.m3u8';
@@ -22,6 +24,14 @@ fs.on('ready', function () {
   var server = http.createServer(serve(fs))
   server.listen(10000)
   discovery(fs, {live: true})
+
+    var wss = ws.createServer({port: 30000}, handle)
+
+    function handle(stream) {
+      var s = fs.replicate({live: true, encrypt: false})
+      pump(s, stream, s)
+    }
+
 })
 
 // fs.readdir('/data/', console.log)
