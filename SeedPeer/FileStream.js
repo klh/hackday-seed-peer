@@ -10,7 +10,7 @@ var path = require('path');
 module.exports = {
     Get: function (playlistUrl) {
         crawl(playlistUrl,
-            function(err) {
+            function (err) {
                 if (err) throw err;
             });
     }
@@ -25,9 +25,8 @@ module.exports = {
 
 
 function crawl(url, cb) {
-
     visit({ url: url, playlist: true }, cb);
-    
+
     function visit(opts, cb) {
         requestAndWrite(opts.url, function (err, body) {
             if (err) return cb(err)
@@ -58,12 +57,18 @@ function requestAndWrite(url, cb) {
     console.log(url + ' --> ' + filename)
 
     fs.readFile(filename, function (_, body) {
-        if (body) return cb(null, body)
+        //if (body) return cb(null, body) //for this use we always get a new file
         mkdirp(path.dirname(filename), function (err) {
             if (err) return cb(err)
             request(url, { encoding: null, jar: true }, function (err, res, body) {
                 if (err) return cb(err)
                 if (res.statusCode !== 200) return cb(new Error('Bad status: ' + res.statusCode))
+
+                if (filename.endsWith('m3u8')) {
+                    body = body.toString().replace(/http:\/\/drevent-lh\.akamaihd\.net\/i\/event12_0@427365\//g, "");
+                    //console.log(body);
+
+                }
                 fs.writeFile(filename + '.tmp', body, function (err) {
                     if (err) return cb(err)
                     fs.rename(filename + '.tmp', filename, function (err) {
