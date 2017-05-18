@@ -10,8 +10,11 @@ var path = require('path');
 module.exports = {
     Get: function (playlistUrl) {
         crawl(playlistUrl,
-            function (err) {
+            function loop (err) {
                 if (err) throw err;
+                setTimeout(function() {
+                    crawl(playlistUrl, loop)
+                }, 3000)
             });
     }
 };
@@ -58,29 +61,38 @@ function requestAndWrite(url, cb) {
 
     fs.readFile(filename, function (_, body) {
         if (body && filename.endsWith('ts')) return cb(null, body) //do not cache playlists
-        mkdirp(path.dirname(filename), function (err) {
-            if (err) return cb(err)
+        // mkdirp(path.dirname(filename), function (err) {
+            // if (err) return cb(err)
             request(url, { encoding: null, jar: true }, function (err, res, body) {
                 if (err) return cb(err)
                 if (res.statusCode !== 200) return cb(new Error('Bad status: ' + res.statusCode))
 
                 if (filename.endsWith('m3u8')) {
                     body = body.toString().replace(/http:\/\/drevent-lh\.akamaihd\.net\/i\/event12_0@427365\//g, "");
+                    body = body.replace(/\?sd=10\&rebase=on/g, '')
+                    body = body.replace(/\?sd=10/g, '')
                 }
-                fs.writeFile(filename + '.tmp', body, function (err) {
-                    if (err) return cb(err)
-                    fs.rename(filename + '.tmp', filename, function (err) {
+
+                fs.readFile(filename, function (_, old) {
+                    if (old && typeof body === 'string' && old.toString() === body) return cb(null, body)
+                    fs.writeFile(filename, body, function (err) {
                         if (err) return cb(err)
                         cb(null, body)
                     })
                 })
+                //     if (err) return cb(err)
+                //     fs.rename(filename + '.tmp', filename, function (err) {
+                //         if (err) return cb(err)
+                //         cb(null, body)
+                //     })
+                // })
             })
-        })
+        // })
     })
 }
 
 function ParseFilename(u) {
-    return u.split('/').slice(2).join('/').split('?')[0]
+    return 'data/' + u.split('/').slice(2).join('/').split('?')[0].replace().split('/').pop()
 }
 
 function ParseURLs(body, baseUrl) {
