@@ -57,7 +57,7 @@ function requestAndWrite(url, cb) {
     console.log(url + ' --> ' + filename)
 
     fs.readFile(filename, function (_, body) {
-        //if (body) return cb(null, body) //for this use we always get a new file
+        if (body && filename.endsWith('ts')) return cb(null, body) //do not cache playlists
         mkdirp(path.dirname(filename), function (err) {
             if (err) return cb(err)
             request(url, { encoding: null, jar: true }, function (err, res, body) {
@@ -66,8 +66,6 @@ function requestAndWrite(url, cb) {
 
                 if (filename.endsWith('m3u8')) {
                     body = body.toString().replace(/http:\/\/drevent-lh\.akamaihd\.net\/i\/event12_0@427365\//g, "");
-                    //console.log(body);
-
                 }
                 fs.writeFile(filename + '.tmp', body, function (err) {
                     if (err) return cb(err)
