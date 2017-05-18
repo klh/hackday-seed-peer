@@ -1,0 +1,26 @@
+{
+  "name": "hackday-seed-peer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pawadrdk/hackday-seed-peer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pawadrdk/hackday-seed-peer/issues"
+  },
+  "homepage": "https://github.com/pawadrdk/hackday-seed-peer#readme",
+  "dependencies": {
+    "hyperdiscovery": "^6.0.4",
+    "hyperdrive": "^9.2.6",
+    "hyperdrive-http": "^4.2.0",
+    "minimist": "^1.2.0",
+    "mirror-folder": "^2.1.0"
+  }
+}
