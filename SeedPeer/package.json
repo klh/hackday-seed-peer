@@ -9,6 +9,7 @@
   "dependencies": {
     "hyperdiscovery": "^6.0.4",
     "hyperdrive": "^9.2.6",
+    "hyperdrive-http": "^4.2.0",
     "mkdirp": "^0.5.1",
     "request": "^2.81.0"
   }
