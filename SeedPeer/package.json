@@ -1,0 +1,9 @@
+{
+  "name": "seed-peer",
+  "version": "0.0.0",
+  "description": "SeedPeer",
+  "main": "server.js",
+  "author": {
+    "name": "taab"
+  }
+}
