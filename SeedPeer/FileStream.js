@@ -1,23 +1,39 @@
 var request = require('request');
 var url = require('url');
 var mkdirp = require('mkdirp');
-var fs = require('fs');
 var path = require('path');
+var hyperdrive = require('hyperdrive')
+var discovery = require('hyperdiscovery')
+var serve = require('hyperdrive-http')
+var http = require('http')
+
+var fs = hyperdrive('./data.drive')
+var playlistUrl = 'http://drevent-lh.akamaihd.net/i/event12_0@427365/master.m3u8';
+
+crawl(playlistUrl,
+    function loop (err) {
+        if (err) throw err;
+        setTimeout(function() {
+            crawl(playlistUrl, loop)
+        }, 3000)
+    });
+
+fs.on('ready', function () {
+  console.log(fs.key.toString('hex'))
+  var server = http.createServer(serve(fs))
+  server.listen(10000)
+  discovery(fs, {live: true})
+})
+
+// fs.readdir('/data/', console.log)
 
 //================
 //public functions
 //=================
-module.exports = {
-    Get: function (playlistUrl) {
-        crawl(playlistUrl,
-            function loop (err) {
-                if (err) throw err;
-                setTimeout(function() {
-                    crawl(playlistUrl, loop)
-                }, 3000)
-            });
-    }
-};
+// module.exports = {
+//     Get: function (playlistUrl) {
+//     }
+// };
 
 
 
@@ -92,7 +108,7 @@ function requestAndWrite(url, cb) {
 }
 
 function ParseFilename(u) {
-    return 'data/' + u.split('/').slice(2).join('/').split('?')[0].replace().split('/').pop()
+    return '/' + u.split('/').slice(2).join('/').split('?')[0].replace().split('/').pop()
 }
 
 function ParseURLs(body, baseUrl) {

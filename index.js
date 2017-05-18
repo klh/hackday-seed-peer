@@ -21,5 +21,7 @@ archive.on('ready', function () {
   console.log('p2p key:', archive.key.toString('hex'))
   var server = http.createServer(serve(archive))
   server.listen(argv.port || 10000)
-  discovery(archive, {live: true})
+  discovery(archive, {live: true}).on('connection', function (c,info) {
+    console.log('onconnection', info)
+  })
 })
