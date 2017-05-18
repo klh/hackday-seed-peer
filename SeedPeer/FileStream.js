@@ -10,7 +10,8 @@ var ws = require('websocket-stream')
 var pump = require('pump')
 
 var fs = hyperdrive('./data.drive')
-var playlistUrl = 'http://drevent-lh.akamaihd.net/i/event12_0@427365/master.m3u8';
+// var playlistUrl = 'http://drevent-lh.akamaihd.net/i/event12_0@427365/master.m3u8';
+var playlistUrl = 'http://dr02-lh.akamaihd.net/i/dr02_0@147055/master.m3u8?b=100-3000'
 
 crawl(playlistUrl,
     function loop () {
@@ -63,10 +64,24 @@ fs.on('ready', function () {
 
 
 function crawl(url, cb) {
-    visit({ url: url, playlist: true }, cb);
+    var pls = {}
+
+    visit({ url: url, playlist: true }, function (err) {
+        if (err) return cb(err)
+
+        var files = Object.keys(pls)
+        loop()
+
+        function loop (err) {
+            if (err) return cb(err)
+            var name = files.shift()
+            if (!name) return cb(null)
+            fs.writeFile(name, pls[name], loop)
+        }
+    });
 
     function visit(opts, cb) {
-        requestAndWrite(opts.url, function (err, body) {
+        requestAndWrite(opts.url, pls, function (err, body) {
             if (err) return cb(err)
             if (!opts.playlist) return cb(null)
 
@@ -89,7 +104,7 @@ function crawl(url, cb) {
     }
 }
 
-function requestAndWrite(url, cb) {
+function requestAndWrite(url, pls, cb) {
     var filename = ParseFilename(url)
 
     console.log(url + ' --> ' + filename)
@@ -104,16 +119,22 @@ function requestAndWrite(url, cb) {
 
                 if (filename.endsWith('m3u8')) {
                     body = body.toString().replace(/http:\/\/drevent-lh\.akamaihd\.net\/i\/event12_0@427365\//g, "");
-                    body = body.replace(/\?sd=10\&rebase=on/g, '')
-                    body = body.replace(/\?sd=10/g, '')
+                    body = body.replace(/http:\/\/dr02-lh\.akamaihd\.net\/i\/dr02_0@147055\//g, "")
+                    body = body.replace(/\?.+/g, '')
                 }
 
                 fs.readFile(filename, function (_, old) {
                     if (old && typeof body === 'string' && old.toString() === body) return cb(null, body)
-                    fs.writeFile(filename, body, function (err) {
-                        if (err) return cb(err)
-                        cb(null, body)
-                    })
+
+                    if (filename.endsWith('m3u8')) {
+                        pls[filename] = body
+                        return cb(null, body)
+                    } else {
+                        fs.writeFile(filename, body, function (err) {
+                            if (err) return cb(err)
+                            cb(null, body)
+                        })
+                    }
                 })
                 //     if (err) return cb(err)
                 //     fs.rename(filename + '.tmp', filename, function (err) {
